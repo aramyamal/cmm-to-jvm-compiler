@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = 'cmm-to-jvm-compiler'
-include('app')
+include('cmm-to-jvm-compiler')

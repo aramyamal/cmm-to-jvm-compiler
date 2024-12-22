@@ -12,15 +12,15 @@
 !settings.gradle
 !gradlew
 !gradlew.bat
-!app/build.gradle
+!cmm-to-jvm-compiler/build.gradle
 
-# Source files
-!app/src/
-!app/src/**/*
+# source files
+!cmm-to-jvm-compiler/src/
+!cmm-to-jvm-compiler/src/**/*
 
-# Documentation
+# documentation
 !README.md
 !*.md
 
-# Git files
+# git files
 !.gitignore
