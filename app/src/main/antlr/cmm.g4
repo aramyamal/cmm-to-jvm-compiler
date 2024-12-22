@@ -1,5 +1,9 @@
 grammar cmm;
 
+// options {
+//     package = cmm_grammar;
+// }
+
 // PARSER RULES
 // a program is a list of definitions
 program

@@ -1,19 +1,25 @@
+# ignore all files
 *
 
-# gradle
+# then allow specific ones
+# gradle files
+!gradle/
+!gradle/wrapper/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 !build.gradle
 !settings.gradle
-
 !gradlew
 !gradlew.bat
-!gradle/wrapper/gradle-wrapper.properties
-!gradle/wrapper/gradle-wrapper.jar
+!app/build.gradle
 
-!src/main/java/**/*
-!src/main/antlr/**/*
-!src/test/java/**/*
+# Source files
+!app/src/
+!app/src/**/*
 
+# Documentation
 !README.md
 !*.md
 
+# Git files
 !.gitignore
