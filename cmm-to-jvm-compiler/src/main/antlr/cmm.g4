@@ -1,8 +1,8 @@
 grammar cmm;
 
-// options {
-//     package = cmm_grammar;
-// }
+options {
+    package = cmm_grammar;
+}
 
 // PARSER RULES
 // a program is a list of definitions
@@ -12,19 +12,19 @@ program
 
 // definitions have type, identifier, arguments and statements
 def 
-    : type Id '(' (arg (',' arg)*)? ')' '{' stm* '}'
+    : type Ident '(' (arg (',' arg)*)? ')' '{' stm* '}'
     ;
 
 // an argument is a type and identifier
 arg
-    : type Id
+    : type Ident
     ;
 
 // statements can be the following
 stm
     : exp ';'                           # ExpStm
-    | type Id (',' Id)* ';'             # DeclsStm
-    | type Id ()                        # InitStm
+    | type Ident (',' Ident)* ';'       # DeclsStm
+    | type Ident '=' exp ';'            # InitStm
     | 'return' exp ';'                  # ReturnStm
     | 'while' '(' exp ')' stm           # WhileStm
     | '{' stm* '}'                      # BlockStm
@@ -33,32 +33,58 @@ stm
 
 // expressions can be the following
 exp
-    : Id '=' exp                        # AssExp
-    | exp '||' exp                      # OrExp
-    | exp '&&' exp                      # AndExp
-    | exp cmpOp exp                     # CmpExp
-    | exp addOp exp                     # AddExp
-    | exp mulOp exp                     # MulExp
-    | boolLit                           # BoolExp
+    : boolLit                           # BoolExp
     | Integer                           # IntExp
     | Double                            # DoubleExp
-    | Id                                # IdExp
-    | Id '(' (exp (',' exp)*)? ')'      # AppExp
-    | Id incDecOp                       # PostExp
-    | incDecOp Id                       # PreExp
+    | Ident                             # IdentExp
+    | Ident '(' (exp (',' exp)*)? ')'   # AppExp
+    | Ident incDecOp                    # PostExp
+    | incDecOp Ident                    # PreExp
+    | exp mulOp exp                     # MulExp
+    | exp addOp exp                     # AddExp
+    | exp cmpOp exp                     # CmpExp
+    | exp '&&' exp                      # AndExp
+    | exp '||' exp                      # OrExp
+    | Ident '=' exp                     # AssExp
     ;
 
-type: 'bool' | 'int' | 'double' | 'void';
+boolType: 'bool';
+intType: 'int';
+doubleType: 'double';
+voidType: 'void';
+type: boolType | intType | doubleType | voidType;
 
-boolLit: 'true' | 'false';
+boolLit
+    : 'true'                            #TrueLit
+    | 'false'                           #FalseLit
+    ;
 
-incDecOp: '++' | '--';
-mulOp: '*' | '/';
-addOp: '+' | '-';
-cmpOp: '<' | '>' | '<=' | '>=' | '==' | '!=';
+incDecOp
+    : '++'                              #Inc
+    | '--'                              #Dec
+    ;
+
+mulOp
+    : '*'                               #Mul
+    | '/'                               #Div
+    ;
+
+addOp
+    : '+'                               #Add
+    | '-'                               #Sub
+    ;
+
+cmpOp
+    : '<'                               #LTh
+    | '>'                               #GTh
+    | '<='                              #LTE 
+    | '>='                              #GTE
+    | '=='                              #Equ
+    | '!='                              #NEq
+    ;
 
 // LEXER RULES
-Id: Letter (Letter | Digit | '_')*;
+Ident: Letter (Letter | Digit | '_')*;
 Integer: Digit+;
 Double: Digit+ '.' Digit+ | Digit+ ('.' Digit+)? ('e' | 'E') ('+' | '-')? Digit+;
 
