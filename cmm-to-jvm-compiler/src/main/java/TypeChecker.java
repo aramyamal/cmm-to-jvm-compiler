@@ -431,15 +431,35 @@ public class TypeChecker {
                 // get operator type
                 Operator operator = switch (e.cmpOp()) {
                     case cmmParser.LThContext _ -> {
+                        if (typedExpLhs.type() == CType.BOOL ||
+                                typedExpRhs.type() == CType.BOOL) {
+                            throw new TypeException("Number comparisons with "
+                                    + "bools not allowed.");
+                        }
                         yield Operator.LTH;
                     }
                     case cmmParser.GThContext _ -> {
+                        if (typedExpLhs.type() == CType.BOOL ||
+                                typedExpRhs.type() == CType.BOOL) {
+                            throw new TypeException("Number comparisons with "
+                                    + "bools not allowed.");
+                        }
                         yield Operator.GTH;
                     }
                     case cmmParser.LTEContext _ -> {
+                        if (typedExpLhs.type() == CType.BOOL ||
+                                typedExpRhs.type() == CType.BOOL) {
+                            throw new TypeException("Number comparisons with "
+                                    + "bools not allowed.");
+                        }
                         yield Operator.LTE;
                     }
                     case cmmParser.GTEContext _ -> {
+                        if (typedExpLhs.type() == CType.BOOL ||
+                                typedExpRhs.type() == CType.BOOL) {
+                            throw new TypeException("Number comparisons with "
+                                    + "bools not allowed.");
+                        }
                         yield Operator.GTE;
                     }
                     case cmmParser.EquContext _ -> {
@@ -651,9 +671,9 @@ public class TypeChecker {
         List<cmmParser.DefContext> functionDefinitions = program.def();
 
         if (functionDefinitions.stream().noneMatch(function -> function
-                        .Ident()
-                        .getText()
-                        .equals("main"))) {
+                .Ident()
+                .getText()
+                .equals("main"))) {
 
             throw new TypeException("Program has no entrypoint 'main'.");
         }
