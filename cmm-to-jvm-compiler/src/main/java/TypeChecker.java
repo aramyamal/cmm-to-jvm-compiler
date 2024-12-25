@@ -81,7 +81,7 @@ public class TypeChecker {
         return switch (stm) {
             case cmmParser.ExpStmContext s -> {
                 TypedExp inferredExp = inferExp(env, s.exp());
-                yield new TypedStm.TypedSExp(
+                yield new TypedStm.Exp(
                         inferredExp.type(),
                         inferredExp);
             }
@@ -101,7 +101,7 @@ public class TypeChecker {
                     env.extendVar(varName, cType);
                     nameList.add(varName);
                 }
-                yield new TypedStm.TypedSDecls(
+                yield new TypedStm.Decls(
                         cType,
                         nameList);
             }
@@ -127,7 +127,7 @@ public class TypeChecker {
                             ", but got " + typedExp.type() + " instead.");
                 }
 
-                yield new TypedStm.TypedSInit(
+                yield new TypedStm.Init(
                         cType,
                         varName,
                         promoteExp(typedExp, cType));
@@ -137,7 +137,7 @@ public class TypeChecker {
                 TypedExp typedRetExp = inferExp(env, s.exp());
                 CType retType = env.currrentReturnType();
                 if (isConvertible(retType, typedRetExp.type())) {
-                    yield new TypedStm.TypedSReturn(promoteExp(
+                    yield new TypedStm.Return(promoteExp(
                             typedRetExp,
                             env.currrentReturnType()));
                 } else {
@@ -156,7 +156,7 @@ public class TypeChecker {
                 env.newContext();
                 TypedStm typedStm = checkStm(env, s.stm());
                 env.removeContext();
-                yield new TypedStm.TypedSWhile(inferredExp, typedStm);
+                yield new TypedStm.While(inferredExp, typedStm);
 
             }
 
@@ -167,7 +167,7 @@ public class TypeChecker {
                     typedStmList.add(checkStm(env, statement));
                 }
                 env.removeContext();
-                yield new TypedStm.TypedSBlock(typedStmList);
+                yield new TypedStm.Block(typedStmList);
             }
 
             case cmmParser.IfElseStmContext s -> {
@@ -185,7 +185,7 @@ public class TypeChecker {
                 TypedStm typedStmElse = checkStm(env, s.stm(1));
                 env.removeContext();
 
-                yield new TypedStm.TypedSIfElse(
+                yield new TypedStm.IfElse(
                         inferredExp,
                         typedStmIf,
                         typedStmElse);
@@ -200,33 +200,39 @@ public class TypeChecker {
             cmmParser.ExpContext exp) {
 
         return switch (exp) {
+
+            case cmmParser.ParenExpContext e -> {
+                TypedExp innerExp = inferExp(env, e.exp());
+                yield new TypedExp.Paren(innerExp, innerExp.type());
+            }
+
             case cmmParser.BoolExpContext e -> {
                 if (e.boolLit() instanceof cmmParser.FalseLitContext) {
-                    yield new TypedExp.TypedEBool(true);
+                    yield new TypedExp.BoolLit(false);
                 } else {
-                    yield new TypedExp.TypedEBool(false);
+                    yield new TypedExp.BoolLit(true);
                 }
             }
 
             case cmmParser.IntExpContext e -> {
-                yield new TypedExp.TypedEInt(
+                yield new TypedExp.IntLit(
                         Integer.parseInt(e.Integer().getText()));
             }
 
             case cmmParser.DoubleExpContext e -> {
-                yield new TypedExp.TypedEDouble(
+                yield new TypedExp.DoubleLit(
                         Double.parseDouble(e.Double().getText()));
             }
 
             case cmmParser.IdentExpContext e -> {
                 String varName = e.Ident().getText();
                 // typechecking done in lookupVar
-                yield new TypedExp.TypedEId(varName, env.lookupVar(varName));
+                yield new TypedExp.Ident(varName, env.lookupVar(varName));
             }
 
             // check if function is defined before it is called and that the
             // call is correct
-            case cmmParser.AppExpContext e -> {
+            case cmmParser.FuncExpContext e -> {
                 String functionName = e.Ident().getText();
                 // check if the function signature is in the environment
                 TypeCheckerEnvironment.Signature envSign = env.lookupFunc(
@@ -269,7 +275,7 @@ public class TypeChecker {
                             promoteExp(typedExpList.get(i), expected));
                 }
 
-                yield new TypedExp.TypedEApp(
+                yield new TypedExp.Func(
                         functionName,
                         typedExpList,
                         envSign.returns());
@@ -298,7 +304,7 @@ public class TypeChecker {
                     }
                 };
 
-                yield new TypedExp.TypedEPost(
+                yield new TypedExp.Post(
                         varName,
                         inferredType,
                         operator);
@@ -327,7 +333,7 @@ public class TypeChecker {
                     }
                 };
 
-                yield new TypedExp.TypedEPre(
+                yield new TypedExp.Pre(
                         varName,
                         inferredType,
                         operator);
@@ -369,7 +375,7 @@ public class TypeChecker {
                     }
                 };
 
-                yield new TypedExp.TypedEMul(
+                yield new TypedExp.Mul(
                         promoteExp(typedExpLhs, domCType),
                         promoteExp(typedExpRhs, domCType),
                         domCType,
@@ -411,7 +417,7 @@ public class TypeChecker {
                     }
                 };
 
-                yield new TypedExp.TypedEAdd(
+                yield new TypedExp.Add(
                         promoteExp(typedExpLhs, domCType),
                         promoteExp(typedExpRhs, domCType),
                         domCType,
@@ -491,7 +497,7 @@ public class TypeChecker {
                         typedExpLhs.type(),
                         typedExpRhs.type());
 
-                yield new TypedExp.TypedECmp(
+                yield new TypedExp.Cmp(
                         promoteExp(typedExpLhs, domCType),
                         promoteExp(typedExpRhs, domCType),
                         operator);
@@ -506,7 +512,7 @@ public class TypeChecker {
                     throw new TypeException("AND (&&) operation can only occur "
                             + "between booleans");
                 }
-                yield new TypedExp.TypedEAnd(typedExpLhs, typedExpRhs);
+                yield new TypedExp.And(typedExpLhs, typedExpRhs);
             }
 
             case cmmParser.OrExpContext e -> {
@@ -517,10 +523,10 @@ public class TypeChecker {
                     throw new TypeException("|| operation can only occur "
                             + "between booleans");
                 }
-                yield new TypedExp.TypedEOr(typedExp1, typedExp2);
+                yield new TypedExp.Or(typedExp1, typedExp2);
             }
 
-            case cmmParser.AssExpContext e -> {
+            case cmmParser.AssignExpContext e -> {
                 String varName = e.Ident().getText();
                 CType variableType = env.lookupVar(varName);
                 TypedExp typedExp = inferExp(env, e.exp());
@@ -530,7 +536,7 @@ public class TypeChecker {
                             + ", but got " + typedExp.type() + " instead.");
                 }
 
-                yield new TypedExp.TypedEAss(
+                yield new TypedExp.Assign(
                         varName,
                         promoteExp(typedExp, variableType),
                         variableType);
@@ -581,7 +587,7 @@ public class TypeChecker {
 
     public TypedExp promoteExp(TypedExp exp, CType dominatingType) {
         if (exp.type() == CType.INT && dominatingType == CType.DOUBLE) {
-            return new TypedExp.TypedEI2D(exp);
+            return new TypedExp.Int2Double(exp);
         } else {
             return exp;
         }
@@ -647,10 +653,10 @@ public class TypeChecker {
             // construct argument list
             LinkedList<TypedArg> typedArgList = new LinkedList<>();
             for (String key : sign.parameters().keySet()) {
-                typedArgList.add(new TypedArg.TypedADecl(params.get(key), key));
+                typedArgList.add(new TypedArg.Decl(params.get(key), key));
             }
 
-            typedDefList.add(new TypedDef.TypedDFun(sign.returns(),
+            typedDefList.add(new TypedDef.Func(sign.returns(),
                     typedArgList, typedStmList, funcName));
 
             env.clearContexts();

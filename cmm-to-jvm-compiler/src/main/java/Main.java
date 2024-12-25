@@ -10,9 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Main {
-    public String getGreeting() {
-        return "Hello World!";
-    }
 
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -31,8 +28,9 @@ public class Main {
             cmmLexer lexer = new cmmLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             cmmParser parser = new cmmParser(tokens);
-            cmmParser.ProgramContext t = parser.program();
-            TypedProgram tProgram = new TypeChecker().typecheck(t);
+            cmmParser.ProgramContext cProgram = parser.program();
+            TypedProgram tProgram = new TypeChecker().typecheck(cProgram);
+            new Interpreter().interpret(tProgram);
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
             System.exit(1);

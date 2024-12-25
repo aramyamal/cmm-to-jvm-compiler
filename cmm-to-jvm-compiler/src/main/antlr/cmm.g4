@@ -33,11 +33,12 @@ stm
 
 // expressions can be the following
 exp
-    : boolLit                           # BoolExp
+    : '(' exp ')'                       # ParenExp
+    | boolLit                           # BoolExp
     | Integer                           # IntExp
     | Double                            # DoubleExp
     | Ident                             # IdentExp
-    | Ident '(' (exp (',' exp)*)? ')'   # AppExp
+    | Ident '(' (exp (',' exp)*)? ')'   # FuncExp
     | Ident incDecOp                    # PostExp
     | incDecOp Ident                    # PreExp
     | exp mulOp exp                     # MulExp
@@ -45,7 +46,7 @@ exp
     | exp cmpOp exp                     # CmpExp
     | exp '&&' exp                      # AndExp
     | exp '||' exp                      # OrExp
-    | Ident '=' exp                     # AssExp
+    | <assoc=right> Ident '=' exp       # AssignExp
     ;
 
 boolType: 'bool';

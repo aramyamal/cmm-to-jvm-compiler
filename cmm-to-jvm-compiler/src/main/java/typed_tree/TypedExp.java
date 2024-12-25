@@ -5,59 +5,62 @@ import java.util.LinkedList;
 public interface TypedExp {
     CType type();
 
+    record Paren(TypedExp exp, CType type) implements TypedExp {
+    }
+
     // ## Atomic expressions
     // ### Literals
-    record TypedEBool(Boolean value) implements TypedExp {
+    record BoolLit(Boolean value) implements TypedExp {
         public CType type() {
             return CType.BOOL;
         }
     }
 
-    record TypedEInt(Integer value) implements TypedExp {
+    record IntLit(Integer value) implements TypedExp {
         public CType type() {
             return CType.INT;
         }
     }
 
-    record TypedEDouble(Double value) implements TypedExp {
+    record DoubleLit(Double value) implements TypedExp {
         public CType type() {
             return CType.DOUBLE;
         }
     }
 
     // ### Identifiers and function calls
-    record TypedEId(String id, CType type) implements TypedExp {
+    record Ident(String id, CType type) implements TypedExp {
     }
 
-    record TypedEApp(String id, LinkedList<TypedExp> exps, CType type)
+    record Func(String id, LinkedList<TypedExp> exps, CType type)
             implements TypedExp {
     }
 
     // ### Increment and decrement
-    record TypedEPost(String id, CType type, Operator operator)
+    record Post(String id, CType type, Operator operator)
             implements TypedExp {
     }
 
-    record TypedEPre(String id, CType type, Operator operator)
+    record Pre(String id, CType type, Operator operator)
             implements TypedExp {
     }
 
     // ## Compund expressions
-    record TypedEMul(TypedExp exp1,
+    record Mul(TypedExp exp1,
             TypedExp exp2,
             CType type,
             Operator operator)
             implements TypedExp {
     }
 
-    record TypedEAdd(TypedExp exp1, 
-            TypedExp exp2, 
-            CType type, 
+    record Add(TypedExp exp1,
+            TypedExp exp2,
+            CType type,
             Operator operator)
             implements TypedExp {
     }
 
-    record TypedECmp(TypedExp exp1, TypedExp exp2, Operator operator)
+    record Cmp(TypedExp exp1, TypedExp exp2, Operator operator)
             implements TypedExp {
 
         public CType type() {
@@ -65,22 +68,22 @@ public interface TypedExp {
         }
     }
 
-    record TypedEAnd(TypedExp exp1, TypedExp exp2) implements TypedExp {
+    record And(TypedExp exp1, TypedExp exp2) implements TypedExp {
         public CType type() {
             return CType.BOOL;
         }
     }
 
-    record TypedEOr(TypedExp exp1, TypedExp exp2) implements TypedExp {
+    record Or(TypedExp exp1, TypedExp exp2) implements TypedExp {
         public CType type() {
             return CType.BOOL;
         }
     }
 
-    record TypedEAss(String id, TypedExp exp, CType type) implements TypedExp {
+    record Assign(String id, TypedExp exp, CType type) implements TypedExp {
     }
 
-    record TypedEI2D(TypedExp exp) implements TypedExp {
+    record Int2Double(TypedExp exp) implements TypedExp {
         public CType type() {
             return CType.DOUBLE;
         }
